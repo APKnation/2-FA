@@ -23,7 +23,7 @@ export class AuthPage {
 
   constructor(
     private fb: FormBuilder,
-    private auth: AuthService,
+    protected auth: AuthService,
     private router: Router,
     private toast: ToastService
   ) {

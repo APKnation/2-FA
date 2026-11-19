@@ -23,6 +23,7 @@ export interface LoginResponse {
   expires_in?: number | null;
   requires_2fa: boolean;
   challenge_token?: string | null;
+  email_code_sent?: boolean;
   message?: string | null;
 }
 

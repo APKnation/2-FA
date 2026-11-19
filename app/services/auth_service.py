@@ -11,6 +11,8 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.services import user_service
+from app.services import mail
+from app.services import two_factor_service
 
 
 def register(db: Session, email: str, password: str, full_name: str | None = None) -> User:
@@ -60,10 +62,19 @@ def login(db: Session, email: str, password: str) -> dict:
         return {
             "requires_2fa": True,
             "challenge_token": create_challenge_token(user.id),
+            "email_code_sent": send_challenge_code_email(user),
             "message": "Provide a TOTP or backup code to finish authentication",
         }
 
     return {"requires_2fa": False, **build_token_pair(user.id, user.token_version)}
+
+
+def send_challenge_code_email(user: User) -> bool:
+    """Email the current TOTP code used for the 2FA step, if mail is configured."""
+    if not user.totp_secret:
+        return False
+    code = two_factor_service.generate_code(user.totp_secret)
+    return mail.send_verification_code(user.email, code, user.full_name)
 
 
 def verify_challenge(db: Session, challenge_token: str, code: str) -> dict:
@@ -79,8 +90,6 @@ def verify_challenge(db: Session, challenge_token: str, code: str) -> dict:
     user = user_service.get_by_id(db, payload["sub"])
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication challenge")
-
-    from app.services import two_factor_service
 
     valid = two_factor_service.verify_totp(user.totp_secret, code) or two_factor_service.verify_backup_code(
         db, user, code

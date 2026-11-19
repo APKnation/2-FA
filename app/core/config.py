@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     # --- CORS ---------------------------------------------------------------
     CORS_ORIGINS: str = "*"
 
+    # --- Email (SMTP) — used to send the 2FA verification code -------------
+    MAIL_HOST: str = ""
+    MAIL_PORT: int = 587
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
+    MAIL_USE_TLS: bool = True
+    MAIL_USE_SSL: bool = False
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

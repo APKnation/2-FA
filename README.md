@@ -57,6 +57,9 @@ Copy `.env.example` to `.env` and adjust the values. The most important settings
 | `LOCKOUT_MINUTES` | `15` | Lockout duration. |
 | `AUTO_CREATE_TABLES` | `True` | Create tables on startup (development only). |
 | `CORS_ORIGINS` | `*` | Comma-separated allowed origins. |
+| `MAIL_HOST` / `MAIL_PORT` / `MAIL_USERNAME` / `MAIL_PASSWORD` | — | SMTP server used to send the 2FA code (see below). |
+| `MAIL_FROM` | — | From address of the mail. |
+| `MAIL_USE_TLS` / `MAIL_USE_SSL` | — | TLS options for the SMTP connection. |
 
 ## Running
 
@@ -139,6 +142,31 @@ curl -X POST localhost:8000/api/v1/auth/verify-2fa \
   -H 'Content-Type: application/json' \
   -d "{\"challenge_token\":\"$CHALLENGE_TOKEN\",\"code\":\"$CODE\"}"
 ```
+
+## Email delivery of the 2FA code
+
+When SMTP is configured, the two-factor verification code is emailed to the
+registered email address as soon as the user starts signing in with 2FA.
+
+Add this to `.env`:
+
+```bash
+MAIL_HOST=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=smtp-user
+MAIL_PASSWORD=smtp-pass
+MAIL_FROM=noreply@secureauth.local
+MAIL_USE_TLS=True   # or use SMTP_SSL / false depending on your provider
+```
+
+Notes:
+
+- If mail fails or SMTP is not configured, `email_code_sent` is `false` and sign-in
+  still works — the user uses their authenticator app or a backup code.
+- The emailed code is the current TOTP code (valid for ~30 seconds), so the user can
+  also copy it into the **Two-step verification** screen.
+- For local development you can point `MAIL_HOST` at a dummy SMTP sink (e.g.
+  `maildev`) or use Postfix.
 
 ## SDK
 

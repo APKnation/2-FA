@@ -32,6 +32,7 @@ export class AuthService {
   readonly user = signal<User | null>(null);
   readonly challengeToken = signal<string | null>(null);
   readonly pendingEmail = signal<string | null>(null);
+  readonly challengeEmailSent = signal(false);
 
   constructor(private http: HttpClient) {}
 
@@ -82,6 +83,7 @@ export class AuthService {
     this.user.set(null);
     this.challengeToken.set(null);
     this.pendingEmail.set(null);
+    this.challengeEmailSent.set(false);
     this.writeStorage(ACCESS_STORAGE_KEY, null);
     this.writeStorage(REFRESH_STORAGE_KEY, null);
   }
@@ -178,6 +180,7 @@ export class AuthService {
 
     if (result.requires_2fa) {
       this.challengeToken.set(result.challenge_token ?? null);
+      this.challengeEmailSent.set(result.email_code_sent === true);
       return result;
     }
 
@@ -201,6 +204,7 @@ export class AuthService {
     });
 
     this.challengeToken.set(null);
+    this.challengeEmailSent.set(false);
     this.setTokens(result.access_token, result.refresh_token);
     await this.loadUser();
     return result;

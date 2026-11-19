@@ -1,13 +1,12 @@
 
 import { Component, OnInit, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-challenge-page',
-  imports: [RouterLink],
   templateUrl: './challenge-page.html',
   styleUrl: './challenge-page.css',
 })
@@ -31,6 +30,10 @@ export class ChallengePage implements OnInit {
 
   protected get email(): string | null {
     return this.auth.pendingEmail();
+  }
+
+  protected get emailSent(): boolean {
+    return this.auth.challengeEmailSent();
   }
 
   protected toggleMode(): void {

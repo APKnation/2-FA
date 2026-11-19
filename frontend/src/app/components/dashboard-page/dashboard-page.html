@@ -61,7 +61,7 @@
       @if (status()?.enabled) {
         <p class="security-note">
           Backup codes remaining:
-          <strong>{{ status()?.backupCodesRemaining ?? 0 }}</strong>
+          <strong>{{ status()?.backup_codes_remaining ?? 0 }}</strong>
         </p>
         <div class="actions">
           <button type="button" class="btn btn-outline" (click)="openModal('regenerate')">

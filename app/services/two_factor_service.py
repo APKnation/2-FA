@@ -54,6 +54,11 @@ def normalize_code(code: str) -> str:
     return code.strip().upper().replace("-", "").replace(" ", "")
 
 
+def generate_code(secret: str) -> str:
+    """Generate the current TOTP code (used when we need to mail a code)."""
+    return _totp(secret).now()
+
+
 def verify_totp(secret: str | None, code: str) -> bool:
     if not secret:
         return False

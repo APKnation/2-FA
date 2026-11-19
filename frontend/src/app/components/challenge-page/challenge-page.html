@@ -26,6 +26,12 @@
       }
     </p>
 
+    @if (emailSent) {
+      <div class="alert alert-success" role="status">
+        A verification code was sent to your registered email. Check your inbox.
+      </div>
+    }
+
     <form (ngSubmit)="submit()">
       @if (error(); as message) {
         <div class="alert alert-error" role="alert">{{ message }}</div>
