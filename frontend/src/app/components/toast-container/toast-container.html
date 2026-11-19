@@ -1,0 +1,23 @@
+
+<div class="toast-wrap" aria-live="polite" aria-atomic="false">
+  @for (item of toast.toasts(); track trackById($index, item)) {
+    <div
+      class="toast"
+      [class.toast-success]="item.type === 'success'"
+      [class.toast-error]="item.type === 'error'"
+      [class.toast-info]="item.type === 'info'"
+      role="status"
+    >
+      <span class="toast-bar" aria-hidden="true"></span>
+      <p class="toast-message">{{ item.message }}</p>
+      <button
+        type="button"
+        class="toast-close"
+        aria-label="Dismiss notification"
+        (click)="toast.dismiss(item.id)"
+      >
+        ×
+      </button>
+    </div>
+  }
+</div>

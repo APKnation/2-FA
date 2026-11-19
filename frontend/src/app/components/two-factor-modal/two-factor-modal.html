@@ -1,0 +1,103 @@
+
+@if (open()) {
+  <div
+    class="modal-overlay"
+    (click)="close()"
+    (document:keydown.escape)="close()"
+  >
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Set up two-factor authentication</h2>
+          <p class="modal-subtitle">
+            Scan the QR code with your authenticator app to protect your account.
+          </p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Close" (click)="close()">
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (error(); as message) {
+          <div class="alert alert-error" role="alert">{{ message }}</div>
+        }
+
+        @if (step() === 'qr') {
+          @if (busy() && !setup()) {
+            <div class="loading-row">
+              <span class="spinner spinner-dark"></span>
+              <span>Generating your secure key…</span>
+            </div>
+          }
+
+          @if (setup(); as data) {
+            <div class="qr-wrap">
+              <img [src]="data.qrcode" alt="QR code for your authenticator app" />
+            </div>
+
+            <p class="manual-label">Or enter this key manually:</p>
+            <div class="secret-row">
+              <code>{{ data.secret }}</code>
+              <button type="button" class="btn btn-outline btn-sm" (click)="copy(data.secret)">
+                Copy
+              </button>
+            </div>
+
+            <div class="field">
+              <label class="label" for="totp-code">Authentication code</label>
+              <input
+                id="totp-code"
+                class="input code-input"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                placeholder="000000"
+                [value]="code"
+                (input)="code = $any($event.target).value"
+              />
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-brand btn-block"
+              [disabled]="busy()"
+              (click)="confirm()"
+            >
+              @if (busy()) {
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Enabling…</span>
+              } @else {
+                <span>Enable two-factor authentication</span>
+              }
+            </button>
+          }
+        } @else {
+          <div class="alert alert-success">
+            Two-factor authentication is now enabled for your account.
+          </div>
+
+          <p class="codes-label">
+            Store these single-use backup codes in a safe place. Each code can be used
+            once if you lose access to your authenticator app.
+          </p>
+
+          <div class="codes-grid">
+            @for (code of codes(); track code) {
+              <div class="code-cell">{{ code }}</div>
+            }
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-outline" (click)="copyCodes()">
+              Copy codes
+            </button>
+            <button type="button" class="btn btn-outline" (click)="downloadCodes()">
+              Download
+            </button>
+            <button type="button" class="btn btn-brand" (click)="close()">Done</button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

@@ -1,59 +1,76 @@
-# Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
+# SecureAuth — Demo Frontend
 
-## Development server
+Angular 21 demo interface for the SecureAuth FastAPI backend. It exercises the complete
+authentication and two-factor authentication flow against the API.
 
-To start a local development server, run:
+## Features
 
-```bash
-ng serve
-```
+- Sign in / create account with validation and inline errors.
+- Two-step verification screen for TOTP and single-use backup codes.
+- Dashboard with profile details and 2FA status.
+- 2FA enrolment: QR code (SVG), manual secret entry, TOTP confirmation, and backup
+  codes with copy/download.
+- Regenerate and disable 2FA.
+- Change password and sign out.
+- Toast notifications and session restore via refresh token.
+- Configurable API base URL (defaults to `/api/v1` through the dev-server proxy).
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Running
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Start the backend first:
 
 ```bash
-ng generate --help
+# from the project root
+uvicorn app.main:app --reload
 ```
 
-## Building
-
-To build the project run:
+Then start the Angular dev server:
 
 ```bash
-ng build
+cd frontend
+npm install   # first time only
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open <http://localhost:4200>. The dev server proxies `/api` to `http://localhost:8000`,
+so the default API base `/api/v1` works without CORS issues.
 
-## Running unit tests
+To call the backend directly instead, open the **API** dialog in the header and set the
+base URL to `http://localhost:8000/api/v1` (the backend allows CORS by default).
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Brand colors
+
+The theme is defined in `src/styles.css`:
+
+| Token | Value | Usage |
+| --- | --- | --- |
+| `--color-brand` | `#176571` | Primary actions, highlights |
+| `--color-navy` | `#1A3567` | Headings, primary buttons |
+| `#ffffff` | white | Cards and surfaces |
+
+## Structure
+
+```
+src/app/
+├── components/
+│   ├── auth-page/          # sign in / create account
+│   ├── challenge-page/     # second-factor verification
+│   ├── dashboard-page/     # profile, 2FA management, session
+│   ├── two-factor-modal/   # QR enrolment + backup codes
+│   ├── password-modal/     # change password
+│   ├── toast-container/    # notifications
+│   └── logo/
+├── guards/                 # auth route guard
+├── services/               # AuthService (API) and ToastService
+├── models.ts               # API types
+├── app.ts / app.html       # shell with header and API settings
+└── app.routes.ts
+```
+
+## Build
 
 ```bash
-ng test
+npm run build   # production bundle in dist/
+npm test        # unit tests (Vitest)
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

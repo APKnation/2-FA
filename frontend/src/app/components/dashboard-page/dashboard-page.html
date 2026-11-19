@@ -1,0 +1,274 @@
+
+@if (loading()) {
+  <div class="state-row">
+    <span class="spinner spinner-dark"></span>
+    <span>Loading your account…</span>
+  </div>
+} @else if (loadError()) {
+  <div class="card state-card">
+    <h1 class="state-title">Session expired</h1>
+    <p class="state-text">{{ loadError() }}</p>
+    <button type="button" class="btn btn-primary" (click)="logout()">Sign in again</button>
+  </div>
+} @else {
+  <div class="dash-grid">
+    <section class="card profile-card">
+      <div class="profile-top">
+        <div class="avatar" aria-hidden="true">{{ initials() }}</div>
+        <div class="profile-id">
+          <h1 class="profile-name">{{ user()?.full_name || user()?.email }}</h1>
+          <p class="profile-email">{{ user()?.email }}</p>
+        </div>
+      </div>
+
+      <dl class="profile-meta">
+        <div class="meta-row">
+          <dt>Status</dt>
+          <dd>
+            <span class="badge" [class.badge-on]="user()?.is_active" [class.badge-off]="!user()?.is_active">
+              {{ user()?.is_active ? 'Active' : 'Disabled' }}
+            </span>
+          </dd>
+        </div>
+        <div class="meta-row">
+          <dt>Member since</dt>
+          <dd>{{ memberSince() }}</dd>
+        </div>
+        <div class="meta-row">
+          <dt>Account ID</dt>
+          <dd class="mono">{{ user()?.id }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card security-card">
+      <div class="card-heading">
+        <div>
+          <h2>Two-factor authentication</h2>
+          <p>
+            Protect your account with an authenticator app and single-use backup codes.
+          </p>
+        </div>
+        <span
+          class="badge"
+          [class.badge-on]="status()?.enabled"
+          [class.badge-off]="!status()?.enabled"
+        >
+          {{ status()?.enabled ? 'Enabled' : 'Disabled' }}
+        </span>
+      </div>
+
+      @if (status()?.enabled) {
+        <p class="security-note">
+          Backup codes remaining:
+          <strong>{{ status()?.backupCodesRemaining ?? 0 }}</strong>
+        </p>
+        <div class="actions">
+          <button type="button" class="btn btn-outline" (click)="openModal('regenerate')">
+            Regenerate backup codes
+          </button>
+          <button type="button" class="btn btn-danger" (click)="openModal('disable')">
+            Disable 2FA
+          </button>
+        </div>
+      } @else {
+        <p class="security-note">
+          Your account is protected by a password only. Add a second factor to keep it
+          secure.
+        </p>
+        <div class="actions">
+          <button type="button" class="btn btn-brand" (click)="openModal('setup')">
+            Set up two-factor authentication
+          </button>
+        </div>
+      }
+    </section>
+
+    <section class="card session-card">
+      <div class="card-heading">
+        <div>
+          <h2>Session & password</h2>
+          <p>Manage your credentials and sign out of this browser.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-outline" (click)="openModal('password')">
+          Change password
+        </button>
+        <button type="button" class="btn btn-danger" (click)="logout()">
+          Sign out
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+<app-two-factor-modal [open]="modal() === 'setup'" (closed)="closeModal()" />
+<app-password-modal [open]="modal() === 'password'" (closed)="closeModal()" />
+
+@if (modal() === 'disable') {
+  <div
+    class="modal-overlay"
+    (click)="closeModal()"
+    (document:keydown.escape)="closeModal()"
+  >
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Disable two-factor authentication</h2>
+          <p class="modal-subtitle">
+            Confirm your password and a current code to turn 2FA off.
+          </p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Close" (click)="closeModal()">
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (error(); as message) {
+          <div class="alert alert-error" role="alert">{{ message }}</div>
+        }
+
+        <div class="field">
+          <label class="label" for="disable-password">Password</label>
+          <input
+            id="disable-password"
+            type="password"
+            class="input"
+            autocomplete="current-password"
+            [value]="disablePassword"
+            (input)="disablePassword = $any($event.target).value"
+          />
+        </div>
+
+        <div class="field">
+          <label class="label" for="disable-code">Authentication code</label>
+          <input
+            id="disable-code"
+            class="input"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="TOTP or backup code"
+            [value]="disableCode"
+            (input)="disableCode = $any($event.target).value"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="closeModal()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            [disabled]="busy()"
+            (click)="submitDisable()"
+          >
+            @if (busy()) {
+              <span class="spinner" aria-hidden="true"></span>
+              <span>Disabling…</span>
+            } @else {
+              <span>Disable 2FA</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modal() === 'regenerate') {
+  <div
+    class="modal-overlay"
+    (click)="closeModal()"
+    (document:keydown.escape)="closeModal()"
+  >
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">Regenerate backup codes</h2>
+          <p class="modal-subtitle">
+            Enter a current authentication code. Your previous codes will stop working.
+          </p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Close" (click)="closeModal()">
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (error(); as message) {
+          <div class="alert alert-error" role="alert">{{ message }}</div>
+        }
+
+        <div class="field">
+          <label class="label" for="regenerate-code">Authentication code</label>
+          <input
+            id="regenerate-code"
+            class="input"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            [value]="regenerateCode"
+            (input)="regenerateCode = $any($event.target).value"
+          />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="closeModal()">Cancel</button>
+          <button
+            type="button"
+            class="btn btn-brand"
+            [disabled]="busy()"
+            (click)="submitRegenerate()"
+          >
+            @if (busy()) {
+              <span class="spinner" aria-hidden="true"></span>
+              <span>Generating…</span>
+            } @else {
+              <span>Generate new codes</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (modal() === 'codes') {
+  <div
+    class="modal-overlay"
+    (click)="closeModal()"
+    (document:keydown.escape)="closeModal()"
+  >
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">New backup codes</h2>
+          <p class="modal-subtitle">
+            Store these single-use codes in a safe place. Your old codes were replaced.
+          </p>
+        </div>
+        <button type="button" class="modal-close" aria-label="Close" (click)="closeModal()">
+          ×
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="codes-grid">
+          @for (code of backupCodes(); track code) {
+            <div class="code-cell">{{ code }}</div>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="copyCodes()">
+            Copy codes
+          </button>
+          <button type="button" class="btn btn-outline" (click)="downloadCodes()">
+            Download
+          </button>
+          <button type="button" class="btn btn-brand" (click)="closeModal()">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
