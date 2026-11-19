@@ -45,7 +45,7 @@ def test_send_verification_code_sends_to_registered_email(monkeypatch):
         def send_message(self, message):
             sent["to"] = message["To"]
             sent["subject"] = message["Subject"]
-            sent["body"] = message.get_payload()
+            sent["body"] = message.get_payload(decode=True).decode()
 
         def quit(self):
             sent["quit"] = True
