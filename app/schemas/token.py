@@ -22,6 +22,7 @@ class LoginResponse(BaseModel):
     expires_in: int | None = None
     requires_2fa: bool = False
     challenge_token: str | None = None
+    email_code_sent: bool | None = None
     message: str | None = None
 
 
