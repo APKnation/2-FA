@@ -1,17 +1,14 @@
 
-import uuid
-from datetime import datetime, timezone
-
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import TokenError
 from app.core.security import (
     build_token_pair,
     create_challenge_token,
     decode_token,
     verify_password,
 )
-from app.core.exceptions import TokenError
 from app.models.user import User
 from app.services import user_service
 
