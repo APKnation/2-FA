@@ -39,7 +39,13 @@ def create_user(db: Session, email: str, password: str, full_name: str | None = 
 
 
 def is_locked(user: User) -> bool:
-    return user.locked_until is not None and user.locked_until > datetime.now(timezone.utc)
+    if user.locked_until is None:
+        return False
+    locked_until = user.locked_until
+    # SQLite returns naive datetimes even for timezone-aware columns.
+    if locked_until.tzinfo is None:
+        locked_until = locked_until.replace(tzinfo=timezone.utc)
+    return locked_until > datetime.now(timezone.utc)
 
 
 def register_failed_attempt(db: Session, user: User) -> None:

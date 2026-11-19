@@ -99,7 +99,7 @@ def confirm(db: Session, user: User, code: str) -> list[str]:
 
     user.totp_enabled = True
     codes = generate_backup_codes()
-    user.backup_codes = [hash_password(code) for code in codes]
+    user.backup_codes = [hash_password(normalize_code(code)) for code in codes]
     db.commit()
     return codes
 
@@ -129,6 +129,6 @@ def regenerate_backup_codes(db: Session, user: User, code: str) -> list[str]:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid authentication code")
 
     codes = generate_backup_codes()
-    user.backup_codes = [hash_password(code) for code in codes]
+    user.backup_codes = [hash_password(normalize_code(code)) for code in codes]
     db.commit()
     return codes

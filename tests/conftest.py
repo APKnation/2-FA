@@ -41,6 +41,15 @@ def db():
         session.close()
 
 
+@pytest.fixture(autouse=True)
+def clean_db(db):
+    """Reset the database between tests."""
+    for table in reversed(Base.metadata.sorted_tables):
+        db.execute(table.delete())
+    db.commit()
+    yield
+
+
 @pytest.fixture
 def client(db):
     def override_get_db():
