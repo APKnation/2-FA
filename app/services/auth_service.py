@@ -3,8 +3,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import TokenError
+import logging
 import secrets
 from datetime import timedelta, timezone
+
+logger = logging.getLogger(__name__)
 
 from app.core.security import (
     build_token_pair,
@@ -76,6 +79,8 @@ def login(db: Session, email: str, password: str) -> dict:
     db.commit()
 
     email_sent = mail.send_verification_code(user.email, otp, user.full_name)
+    if settings.DEBUG:
+        logger.warning("DEBUG: email OTP for %s is %s", user.email, otp)
     return {
         "requires_2fa": True,
         "challenge_token": create_challenge_token(user.id),

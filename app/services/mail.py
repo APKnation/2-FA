@@ -44,10 +44,10 @@ SecureAuth
             smtp = smtplib.SMTP_SSL(settings.MAIL_HOST, settings.MAIL_PORT, timeout=10)
         else:
             smtp = smtplib.SMTP(settings.MAIL_HOST, settings.MAIL_PORT, timeout=10)
-        if settings.MAIL_USERNAME and settings.MAIL_PASSWORD:
-            smtp.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
         if settings.MAIL_USE_TLS and not settings.MAIL_USE_SSL:
             smtp.starttls()
+        if settings.MAIL_USERNAME and settings.MAIL_PASSWORD:
+            smtp.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
         smtp.send_message(message)
         return True
     except Exception as exc:  # noqa: BLE001 — never break sign-in on mail failure

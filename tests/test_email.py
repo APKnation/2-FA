@@ -25,8 +25,10 @@ def _set_mail_env(monkeypatch, **overrides):
         monkeypatch.setattr(mail.settings, key, value)
 
 
-def test_send_verification_code_skipped_without_smtp_config():
+def test_send_verification_code_skipped_without_smtp_config(monkeypatch):
     # With no MAIL_HOST / MAIL_FROM configured the mail is skipped.
+    monkeypatch.setattr(mail.settings, "MAIL_HOST", "")
+    monkeypatch.setattr(mail.settings, "MAIL_FROM", "")
     assert mail.send_verification_code("user@example.com", "123456") is False
 
 
