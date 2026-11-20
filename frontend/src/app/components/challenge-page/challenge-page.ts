@@ -41,6 +41,7 @@ export class ChallengePage implements OnInit {
   }
 
   protected async submit(): Promise<void> {
+    alert('submit called, code=' + this.code);
     this.error.set(null);
     const trimmed = this.code.trim();
 
@@ -59,6 +60,7 @@ export class ChallengePage implements OnInit {
       this.toast.success('Signed in successfully.');
       void this.router.navigateByUrl('/dashboard');
     } catch (err) {
+      alert('verify failed: ' + (err as Error).message);
       this.error.set((err as Error).message);
     } finally {
       this.busy.set(false);
