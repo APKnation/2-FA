@@ -45,7 +45,7 @@ Copy `.env.example` to `.env` and adjust the values. The most important settings
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `DATABASE_URL` | `sqlite:///./secureauth.db` | Any SQLAlchemy URL. Use PostgreSQL in production. |
+| `DATABASE_URL` | `postgresql+psycopg://user:password@localhost:5432/secureauth` | Any SQLAlchemy URL. PostgreSQL is used for deployment. |
 | `SECRET_KEY` | dev placeholder | **Must** be a long random value in production (`openssl rand -hex 32`). |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `15` | Access token lifetime. |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `7` | Refresh token lifetime. |
