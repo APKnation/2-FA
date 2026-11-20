@@ -211,11 +211,14 @@ export class AuthService {
       body: { challenge_token: challenge, code },
       auth: false,
     });
+    console.log('verify result', result);
 
     this.challengeToken.set(null);
     this.challengeEmailSent.set(false);
     this.setTokens(result.access_token, result.refresh_token);
+    console.log('after setTokens', this.accessToken());
     await this.loadUser();
+    console.log('after loadUser', this.user());
     return result;
   }
 
