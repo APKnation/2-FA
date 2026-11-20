@@ -11,7 +11,9 @@ class Settings(BaseSettings):
     # --- Database -----------------------------------------------------------
     # Any SQLAlchemy URL works. PostgreSQL is recommended for production:
     #   postgresql+psycopg://user:password@localhost:5432/secureauth
-    DATABASE_URL: str = "sqlite:///./secureauth.db"
+    # PostgreSQL is used in production/deployment (FastAPI Cloud).
+    # Override with sqlite:///... for local development if desired.
+    DATABASE_URL: str = "postgresql+psycopg://user:password@localhost:5432/secureauth"
     # Convenience for local development. Set to False when using Alembic.
     AUTO_CREATE_TABLES: bool = True
 
