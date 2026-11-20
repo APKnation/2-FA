@@ -1,4 +1,3 @@
-
 import { Component, effect, input, output, signal } from '@angular/core';
 
 import { AuthService } from '../../services/auth.service';
@@ -23,7 +22,7 @@ export class TwoFactorModal {
 
   constructor(
     private auth: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
   ) {
     effect(() => {
       if (this.open()) {

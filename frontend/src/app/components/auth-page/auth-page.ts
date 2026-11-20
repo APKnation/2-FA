@@ -1,4 +1,3 @@
-
 import { Component, input, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -25,7 +24,7 @@ export class AuthPage {
     private fb: FormBuilder,
     protected auth: AuthService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
   ) {
     this.form = this.fb.group({
       fullName: [''],

@@ -1,4 +1,3 @@
-
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -40,8 +39,12 @@ export class AuthService {
   // Configuration / session helpers
   // ------------------------------------------------------------------
   private readApiBase(): string {
-    const stored = localStorage.getItem(API_STORAGE_KEY);
-    return stored ? stored.replace(/\/$/, '') : '/api/v1';
+    try {
+      const stored = localStorage.getItem(API_STORAGE_KEY);
+      return stored ? stored.replace(/\/$/, '') : '/api/v1';
+    } catch {
+      return '/api/v1';
+    }
   }
 
   private readStorage(key: string): string | null {
@@ -67,7 +70,11 @@ export class AuthService {
   setApiBase(url: string): void {
     const normalized = url.trim().replace(/\/$/, '') || '/api/v1';
     this.apiBaseSignal.set(normalized);
-    localStorage.setItem(API_STORAGE_KEY, normalized);
+    try {
+      localStorage.setItem(API_STORAGE_KEY, normalized);
+    } catch {
+      // Storage can be unavailable (private mode); the in-memory value still applies.
+    }
   }
 
   private setTokens(access: string, refresh: string): void {
@@ -106,14 +113,16 @@ export class AuthService {
       return detail;
     }
     if (Array.isArray(detail) && detail.length > 0) {
-      return detail
-        .map((item) => (item as { msg?: string })?.msg || 'Invalid input')
-        .join(', ');
+      return detail.map((item) => (item as { msg?: string })?.msg || 'Invalid input').join(', ');
     }
     return err?.message || 'Something went wrong. Please try again.';
   }
 
-  private async request<T>(path: string, options: RequestOptions = {}, retried = false): Promise<T> {
+  private async request<T>(
+    path: string,
+    options: RequestOptions = {},
+    retried = false,
+  ): Promise<T> {
     const { method = 'GET', body, auth = true } = options;
 
     try {
@@ -122,7 +131,7 @@ export class AuthService {
           body,
           headers: this.headers(auth),
           responseType: 'json',
-        })
+        }),
       );
     } catch (error) {
       const status = (error as { status?: number })?.status;
@@ -149,7 +158,7 @@ export class AuthService {
       const result = await firstValueFrom(
         this.http.post<TokenPair>(`${this.apiBaseSignal()}/auth/refresh`, {
           refresh_token: this.refreshToken(),
-        })
+        }),
       );
       this.setTokens(result.access_token, result.refresh_token);
       return true;

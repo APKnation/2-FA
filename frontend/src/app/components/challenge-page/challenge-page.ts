@@ -1,4 +1,3 @@
-
 import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -19,7 +18,7 @@ export class ChallengePage implements OnInit {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {
@@ -49,7 +48,7 @@ export class ChallengePage implements OnInit {
       this.error.set(
         this.useBackup()
           ? 'Enter a backup code.'
-          : 'Enter the 6-digit code from your authenticator app.'
+          : 'Enter the 6-digit code from your authenticator app.',
       );
       return;
     }

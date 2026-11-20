@@ -1,10 +1,5 @@
-
 @if (open()) {
-  <div
-    class="modal-overlay"
-    (click)="close()"
-    (document:keydown.escape)="close()"
-  >
+  <div class="modal-overlay" (click)="close()" (document:keydown.escape)="close()">
     <div class="modal-panel" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
@@ -13,9 +8,7 @@
             Scan the QR code with your authenticator app to protect your account.
           </p>
         </div>
-        <button type="button" class="modal-close" aria-label="Close" (click)="close()">
-          ×
-        </button>
+        <button type="button" class="modal-close" aria-label="Close" (click)="close()">×</button>
       </div>
 
       <div class="modal-body">
@@ -77,8 +70,8 @@
           </div>
 
           <p class="codes-label">
-            Store these single-use backup codes in a safe place. Each code can be used
-            once if you lose access to your authenticator app.
+            Store these single-use backup codes in a safe place. Each code can be used once if you
+            lose access to your authenticator app.
           </p>
 
           <div class="codes-grid">
@@ -88,9 +81,7 @@
           </div>
 
           <div class="modal-actions">
-            <button type="button" class="btn btn-outline" (click)="copyCodes()">
-              Copy codes
-            </button>
+            <button type="button" class="btn btn-outline" (click)="copyCodes()">Copy codes</button>
             <button type="button" class="btn btn-outline" (click)="downloadCodes()">
               Download
             </button>

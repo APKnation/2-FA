@@ -1,4 +1,3 @@
-
 import { Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -34,7 +33,7 @@ export class DashboardPage implements OnInit {
   constructor(
     private auth: AuthService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
   ) {}
 
   ngOnInit(): void {

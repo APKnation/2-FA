@@ -1,12 +1,8 @@
-
 <div class="auth-layout">
   <div class="card auth-card">
     <div class="challenge-icon" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5l8-3z"
-          fill="currentColor"
-        />
+        <path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5l8-3z" fill="currentColor" />
         <rect x="9.4" y="9.6" width="5.2" height="4.6" rx="1" fill="#ffffff" />
         <path
           d="M10.6 13.4v2.2a.9.9 0 001.8 0v-2.2"
@@ -14,7 +10,7 @@
           stroke-width="1.4"
           stroke-linecap="round"
         />
-    </svg>
+      </svg>
     </div>
 
     <h1 class="challenge-title">Two-step verification</h1>
@@ -56,7 +52,11 @@
         {{ useBackup() ? 'Use authenticator code instead' : 'Use a backup code instead' }}
       </button>
 
-      <button type="submit" class="btn btn-brand btn-block submit" [disabled]="busy() || !code.trim()">
+      <button
+        type="submit"
+        class="btn btn-brand btn-block submit"
+        [disabled]="busy() || !code.trim()"
+      >
         @if (busy()) {
           <span class="spinner" aria-hidden="true"></span>
           <span>Verifying…</span>

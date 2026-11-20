@@ -1,4 +1,3 @@
-
 import { Component, input, output, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -22,7 +21,7 @@ export class PasswordModal {
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
   ) {
     this.form = this.fb.group({
       currentPassword: ['', [Validators.required]],

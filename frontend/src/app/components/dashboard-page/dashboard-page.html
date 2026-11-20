@@ -1,4 +1,3 @@
-
 @if (loading()) {
   <div class="state-row">
     <span class="spinner spinner-dark"></span>
@@ -25,7 +24,11 @@
         <div class="meta-row">
           <dt>Status</dt>
           <dd>
-            <span class="badge" [class.badge-on]="user()?.is_active" [class.badge-off]="!user()?.is_active">
+            <span
+              class="badge"
+              [class.badge-on]="user()?.is_active"
+              [class.badge-off]="!user()?.is_active"
+            >
               {{ user()?.is_active ? 'Active' : 'Disabled' }}
             </span>
           </dd>
@@ -45,9 +48,7 @@
       <div class="card-heading">
         <div>
           <h2>Two-factor authentication</h2>
-          <p>
-            Protect your account with an authenticator app and single-use backup codes.
-          </p>
+          <p>Protect your account with an authenticator app and single-use backup codes.</p>
         </div>
         <span
           class="badge"
@@ -73,8 +74,7 @@
         </div>
       } @else {
         <p class="security-note">
-          Your account is protected by a password only. Add a second factor to keep it
-          secure.
+          Your account is protected by a password only. Add a second factor to keep it secure.
         </p>
         <div class="actions">
           <button type="button" class="btn btn-brand" (click)="openModal('setup')">
@@ -95,9 +95,7 @@
         <button type="button" class="btn btn-outline" (click)="openModal('password')">
           Change password
         </button>
-        <button type="button" class="btn btn-danger" (click)="logout()">
-          Sign out
-        </button>
+        <button type="button" class="btn btn-danger" (click)="logout()">Sign out</button>
       </div>
     </section>
   </div>
@@ -107,18 +105,12 @@
 <app-password-modal [open]="modal() === 'password'" (closed)="closeModal()" />
 
 @if (modal() === 'disable') {
-  <div
-    class="modal-overlay"
-    (click)="closeModal()"
-    (document:keydown.escape)="closeModal()"
-  >
+  <div class="modal-overlay" (click)="closeModal()" (document:keydown.escape)="closeModal()">
     <div class="modal-panel" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
           <h2 class="modal-title">Disable two-factor authentication</h2>
-          <p class="modal-subtitle">
-            Confirm your password and a current code to turn 2FA off.
-          </p>
+          <p class="modal-subtitle">Confirm your password and a current code to turn 2FA off.</p>
         </div>
         <button type="button" class="modal-close" aria-label="Close" (click)="closeModal()">
           ×
@@ -177,11 +169,7 @@
 }
 
 @if (modal() === 'regenerate') {
-  <div
-    class="modal-overlay"
-    (click)="closeModal()"
-    (document:keydown.escape)="closeModal()"
-  >
+  <div class="modal-overlay" (click)="closeModal()" (document:keydown.escape)="closeModal()">
     <div class="modal-panel" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
@@ -234,11 +222,7 @@
 }
 
 @if (modal() === 'codes') {
-  <div
-    class="modal-overlay"
-    (click)="closeModal()"
-    (document:keydown.escape)="closeModal()"
-  >
+  <div class="modal-overlay" (click)="closeModal()" (document:keydown.escape)="closeModal()">
     <div class="modal-panel" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
@@ -260,12 +244,8 @@
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-outline" (click)="copyCodes()">
-            Copy codes
-          </button>
-          <button type="button" class="btn btn-outline" (click)="downloadCodes()">
-            Download
-          </button>
+          <button type="button" class="btn btn-outline" (click)="copyCodes()">Copy codes</button>
+          <button type="button" class="btn btn-outline" (click)="downloadCodes()">Download</button>
           <button type="button" class="btn btn-brand" (click)="closeModal()">Done</button>
         </div>
       </div>

@@ -1,23 +1,16 @@
-
 <div class="app-shell">
   <header class="app-header">
     <div class="header-inner">
       <a class="brand" routerLink="/dashboard" data-testid="brand">
         <span class="brand-mark"><app-logo [size]="26" /></span>
-        <span class="brand-name">
-          Secure<span class="brand-accent">Auth</span>
-        </span>
+        <span class="brand-name"> Secure<span class="brand-accent">Auth</span> </span>
       </a>
 
       <div class="header-actions">
         <span class="api-chip" title="API base URL">{{ auth.apiBase() }}</span>
-        <button type="button" class="btn btn-ghost btn-sm" (click)="openApiSettings()">
-          API
-        </button>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="openApiSettings()">API</button>
         @if (auth.accessToken()) {
-          <button type="button" class="btn btn-outline btn-sm" (click)="logout()">
-            Sign out
-          </button>
+          <button type="button" class="btn btn-outline btn-sm" (click)="logout()">Sign out</button>
         }
       </div>
     </div>
@@ -41,12 +34,7 @@
             <h2 class="modal-title">API settings</h2>
             <p class="modal-subtitle">Base URL of the SecureAuth backend.</p>
           </div>
-          <button
-            type="button"
-            class="modal-close"
-            aria-label="Close"
-            (click)="apiOpen.set(false)"
-          >
+          <button type="button" class="modal-close" aria-label="Close" (click)="apiOpen.set(false)">
             ×
           </button>
         </div>
@@ -67,11 +55,10 @@
             <button type="button" class="btn btn-outline" (click)="apiOpen.set(false)">
               Cancel
             </button>
-            <button type="button" class="btn btn-brand" (click)="saveApiSettings()">
-              Save
-            </button>
+            <button type="button" class="btn btn-brand" (click)="saveApiSettings()">Save</button>
           </div>
         </div>
       </div>
     </div>
   }
+</div>
