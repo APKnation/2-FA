@@ -6,14 +6,15 @@ import app.services.auth_service as auth_service
 
 # Make email OTP deterministic in tests.
 auth_service._generate_email_otp = lambda: "123456"
-auth_service.mail.send_verification_code = lambda *a, **k: True
 
 
 def register(client, email=EMAIL, password=PASSWORD, full_name="Alice"):
     return client.post(
         "/api/v1/auth/register",
         json={"email": email, "password": password, "full_name": full_name},
-    )def login(client, email=EMAIL, password=PASSWORD):
+    )
+
+def login(client, email=EMAIL, password=PASSWORD):
     response = client.post(
         "/api/v1/auth/login", json={"email": email, "password": password}
     )

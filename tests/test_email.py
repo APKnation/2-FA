@@ -8,7 +8,6 @@ from app.services import mail
 
 # Make email OTP deterministic in tests.
 auth_service._generate_email_otp = lambda: "123456"
-auth_service.mail.send_verification_code = lambda *a, **k: True
 
 
 def _set_mail_env(monkeypatch, **overrides):

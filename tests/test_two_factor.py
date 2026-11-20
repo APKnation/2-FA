@@ -5,7 +5,6 @@ import app.services.auth_service as auth_service
 
 # Make email OTP deterministic in tests.
 auth_service._generate_email_otp = lambda: "123456"
-auth_service.mail.send_verification_code = lambda *a, **k: True
 
 EMAIL = "bob@example.com"
 PASSWORD = "Sup3r-Secret!"
@@ -47,7 +46,10 @@ def enable_2fa(client):
 
 def test_setup_returns_secret_and_qrcode(client):
     register(client)
-    access = login(client).json()["access_token"]
+    challenge = login(client).json()["challenge_token"]
+    access = client.post(
+        "/api/v1/auth/verify-2fa", json={"challenge_token": challenge, "code": "123456"}
+    ).json()["access_token"]
 
     response = client.post("/api/v1/auth/2fa/setup", headers=headers(access))
     assert response.status_code == 200
@@ -71,7 +73,10 @@ def test_confirm_enables_2fa_and_issues_backup_codes(client):
 
 def test_confirm_rejects_wrong_code(client):
     register(client)
-    access = login(client).json()["access_token"]
+    challenge = login(client).json()["challenge_token"]
+    access = client.post(
+        "/api/v1/auth/verify-2fa", json={"challenge_token": challenge, "code": "123456"}
+    ).json()["access_token"]
     client.post("/api/v1/auth/2fa/setup", headers=headers(access))
 
     response = client.post("/api/v1/auth/2fa/confirm", json={"code": "000000"}, headers=headers(access))
@@ -90,7 +95,8 @@ def test_login_requires_second_factor(client):
 
 def test_verify_challenge_with_totp(client):
     register(client, email="totp@example.com")
-    access = login(client, email="totp@example.com").json()["access_token"]
+    _ch = login(client, email="totp@example.com").json()["challenge_token"]
+    access = client.post("/api/v1/auth/verify-2fa", json={"challenge_token": _ch, "code": "123456"}).json()["access_token"]
     auth = headers(access)
     secret = client.post("/api/v1/auth/2fa/setup", headers=auth).json()["secret"]
     client.post(
@@ -112,7 +118,8 @@ def test_verify_challenge_with_totp(client):
 
 def test_verify_challenge_rejects_wrong_code(client):
     register(client, email="wrong@example.com")
-    access = login(client, email="wrong@example.com").json()["access_token"]
+    _ch = login(client, email="wrong@example.com").json()["challenge_token"]
+    access = client.post("/api/v1/auth/verify-2fa", json={"challenge_token": _ch, "code": "123456"}).json()["access_token"]
     auth = headers(access)
     secret = client.post("/api/v1/auth/2fa/setup", headers=auth).json()["secret"]
     client.post(
@@ -131,7 +138,8 @@ def test_verify_challenge_rejects_wrong_code(client):
 
 def test_backup_code_can_finish_login_and_is_single_use(client):
     register(client, email="backup@example.com")
-    access = login(client, email="backup@example.com").json()["access_token"]
+    _ch = login(client, email="backup@example.com").json()["challenge_token"]
+    access = client.post("/api/v1/auth/verify-2fa", json={"challenge_token": _ch, "code": "123456"}).json()["access_token"]
     auth = headers(access)
     secret = client.post("/api/v1/auth/2fa/setup", headers=auth).json()["secret"]
     codes = client.post(
@@ -160,7 +168,8 @@ def test_backup_code_can_finish_login_and_is_single_use(client):
 
 def test_regenerate_backup_codes_invalidates_old_ones(client):
     register(client, email="regen@example.com")
-    access = login(client, email="regen@example.com").json()["access_token"]
+    _ch = login(client, email="regen@example.com").json()["challenge_token"]
+    access = client.post("/api/v1/auth/verify-2fa", json={"challenge_token": _ch, "code": "123456"}).json()["access_token"]
     auth = headers(access)
     secret = client.post("/api/v1/auth/2fa/setup", headers=auth).json()["secret"]
     old_codes = client.post(
@@ -181,7 +190,8 @@ def test_regenerate_backup_codes_invalidates_old_ones(client):
 
 def test_disable_requires_password_and_code(client):
     register(client, email="disable@example.com")
-    access = login(client, email="disable@example.com").json()["access_token"]
+    _ch = login(client, email="disable@example.com").json()["challenge_token"]
+    access = client.post("/api/v1/auth/verify-2fa", json={"challenge_token": _ch, "code": "123456"}).json()["access_token"]
     auth = headers(access)
     secret = client.post("/api/v1/auth/2fa/setup", headers=auth).json()["secret"]
     client.post(

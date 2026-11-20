@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import TokenError
 import secrets
-from datetime import timedelta
+from datetime import timedelta, timezone
 
 from app.core.security import (
     build_token_pair,
@@ -109,7 +109,10 @@ def verify_challenge(db: Session, challenge_token: str, code: str) -> dict:
     valid = False
     # Email one-time password (primary flow for all users).
     if user.email_otp_hash and user.email_otp_expires_at:
-        if utcnow() <= user.email_otp_expires_at and verify_password(
+        expires_at = user.email_otp_expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        if utcnow() <= expires_at and verify_password(
             code.strip(), user.email_otp_hash
         ):
             valid = True
