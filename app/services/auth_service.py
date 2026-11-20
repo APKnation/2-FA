@@ -3,12 +3,18 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import TokenError
+import secrets
+from datetime import timedelta
+
 from app.core.security import (
     build_token_pair,
     create_challenge_token,
     decode_token,
+    hash_password,
     verify_password,
 )
+from app.core.config import settings
+from app.models.user import utcnow
 from app.models.user import User
 from app.services import user_service
 from app.services import mail
@@ -54,19 +60,28 @@ def authenticate(db: Session, email: str, password: str) -> User:
     return user
 
 
+def _generate_email_otp() -> str:
+    return "".join(secrets.choice("0123456789") for _ in range(6))
+
+
 def login(db: Session, email: str, password: str) -> dict:
-    """First factor. Returns a token pair, or a 2FA challenge."""
+    """First factor. Returns a 2FA challenge secured by an emailed one-time code."""
     user = authenticate(db, email, password)
 
-    if user.totp_enabled:
-        return {
-            "requires_2fa": True,
-            "challenge_token": create_challenge_token(user.id),
-            "email_code_sent": send_challenge_code_email(user),
-            "message": "Provide a TOTP or backup code to finish authentication",
-        }
+    otp = _generate_email_otp()
+    user.email_otp_hash = hash_password(otp)
+    user.email_otp_expires_at = utcnow() + timedelta(
+        minutes=settings.CHALLENGE_TOKEN_EXPIRE_MINUTES
+    )
+    db.commit()
 
-    return {"requires_2fa": False, **build_token_pair(user.id, user.token_version)}
+    email_sent = mail.send_verification_code(user.email, otp, user.full_name)
+    return {
+        "requires_2fa": True,
+        "challenge_token": create_challenge_token(user.id),
+        "email_code_sent": email_sent,
+        "message": "Provide the code sent to your email to finish authentication",
+    }
 
 
 def send_challenge_code_email(user: User) -> bool:
@@ -91,9 +106,22 @@ def verify_challenge(db: Session, challenge_token: str, code: str) -> dict:
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication challenge")
 
-    valid = two_factor_service.verify_totp(user.totp_secret, code) or two_factor_service.verify_backup_code(
-        db, user, code
-    )
+    valid = False
+    # Email one-time password (primary flow for all users).
+    if user.email_otp_hash and user.email_otp_expires_at:
+        if utcnow() <= user.email_otp_expires_at and verify_password(
+            code.strip(), user.email_otp_hash
+        ):
+            valid = True
+            user.email_otp_hash = None
+            user.email_otp_expires_at = None
+
+    # Legacy TOTP / backup codes, kept for backward compatibility.
+    if not valid:
+        valid = two_factor_service.verify_totp(user.totp_secret, code) or two_factor_service.verify_backup_code(
+            db, user, code
+        )
+
     if not valid:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication code")
 

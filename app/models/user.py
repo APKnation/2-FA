@@ -31,6 +31,10 @@ class User(Base):
     # Argon2id hashes of single-use backup codes.
     backup_codes: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
 
+    # --- Email one-time password (used for login 2FA) -----------------------
+    email_otp_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email_otp_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
     # --- Brute-force protection --------------------------------------------
     failed_login_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

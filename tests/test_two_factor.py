@@ -1,6 +1,12 @@
 
 import pyotp
 
+import app.services.auth_service as auth_service
+
+# Make email OTP deterministic in tests.
+auth_service._generate_email_otp = lambda: "123456"
+auth_service.mail.send_verification_code = lambda *a, **k: True
+
 EMAIL = "bob@example.com"
 PASSWORD = "Sup3r-Secret!"
 
@@ -23,7 +29,10 @@ def headers(token):
 def enable_2fa(client):
     """Register a user, enrol 2FA and return (access_token, secret, backup_codes)."""
     register(client)
-    access = login(client).json()["access_token"]
+    challenge = login(client).json()["challenge_token"]
+    access = client.post(
+        "/api/v1/auth/verify-2fa", json={"challenge_token": challenge, "code": "123456"}
+    ).json()["access_token"]
     auth = headers(access)
 
     setup = client.post("/api/v1/auth/2fa/setup", headers=auth)

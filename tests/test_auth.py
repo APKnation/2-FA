@@ -2,16 +2,28 @@
 EMAIL = "alice@example.com"
 PASSWORD = "Sup3r-Secret!"
 
+import app.services.auth_service as auth_service
+
+# Make email OTP deterministic in tests.
+auth_service._generate_email_otp = lambda: "123456"
+auth_service.mail.send_verification_code = lambda *a, **k: True
+
 
 def register(client, email=EMAIL, password=PASSWORD, full_name="Alice"):
     return client.post(
         "/api/v1/auth/register",
         json={"email": email, "password": password, "full_name": full_name},
+    )def login(client, email=EMAIL, password=PASSWORD):
+    response = client.post(
+        "/api/v1/auth/login", json={"email": email, "password": password}
     )
-
-
-def login(client, email=EMAIL, password=PASSWORD):
-    return client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    if response.status_code == 200 and response.json().get("requires_2fa"):
+        challenge = response.json()["challenge_token"]
+        return client.post(
+            "/api/v1/auth/verify-2fa",
+            json={"challenge_token": challenge, "code": "123456"},
+        )
+    return response
 
 
 def auth_headers(token: str) -> dict:
@@ -46,7 +58,6 @@ def test_login_success(client):
     response = login(client)
     assert response.status_code == 200
     body = response.json()
-    assert body["requires_2fa"] is False
     assert body["access_token"]
     assert body["refresh_token"]
     assert body["token_type"] == "bearer"

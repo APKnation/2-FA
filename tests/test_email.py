@@ -6,6 +6,10 @@ import pyotp
 from app.services import auth_service
 from app.services import mail
 
+# Make email OTP deterministic in tests.
+auth_service._generate_email_otp = lambda: "123456"
+auth_service.mail.send_verification_code = lambda *a, **k: True
+
 
 def _set_mail_env(monkeypatch, **overrides):
     values = {
@@ -83,7 +87,11 @@ def _enable_2fa(client, email):
         "/api/v1/auth/register",
         json={"email": email, "password": "Sup3r-Secret!", "full_name": "Mail User"},
     )
-    token = client.post("/api/v1/auth/login", json={"email": email, "password": "Sup3r-Secret!"}).json()["access_token"]
+    login_resp = client.post("/api/v1/auth/login", json={"email": email, "password": "Sup3r-Secret!"})
+    challenge = login_resp.json()["challenge_token"]
+    token = client.post(
+        "/api/v1/auth/verify-2fa", json={"challenge_token": challenge, "code": "123456"}
+    ).json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
     secret = client.post("/api/v1/auth/2fa/setup", headers=headers).json()["secret"]
